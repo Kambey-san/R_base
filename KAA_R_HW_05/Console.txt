@@ -1,0 +1,508 @@
+R version 4.3.2 (2023-10-31 ucrt) -- "Eye Holes"
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> setwd("C:/Users/Администратор/OneDrive/Документы/Alex/TEMP/Язык R для анализа данных/Урок 5. Статистический анализ в R. Тест гипотезы/00_HW")
+> install.packages("rafalib")
+WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
+
+https://cran.rstudio.com/bin/windows/Rtools/
+Installing package into ‘C:/Users/Администратор/AppData/Local/R/win-library/4.3’
+(as ‘lib’ is unspecified)
+trying URL 'https://cran.rstudio.com/bin/windows/contrib/4.3/rafalib_1.0.0.zip'
+Content type 'application/zip' length 56500 bytes (55 KB)
+downloaded 55 KB
+
+package ‘rafalib’ successfully unpacked and MD5 sums checked
+
+The downloaded binary packages are in
+	C:\Users\Администратор\AppData\Local\Temp\RtmpgJnyim\downloaded_packages
+> install.packages("effsize")
+WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
+
+https://cran.rstudio.com/bin/windows/Rtools/
+Installing package into ‘C:/Users/Администратор/AppData/Local/R/win-library/4.3’
+(as ‘lib’ is unspecified)
+trying URL 'https://cran.rstudio.com/bin/windows/contrib/4.3/effsize_0.8.1.zip'
+Content type 'application/zip' length 65088 bytes (63 KB)
+downloaded 63 KB
+
+package ‘effsize’ successfully unpacked and MD5 sums checked
+
+The downloaded binary packages are in
+	C:\Users\Администратор\AppData\Local\Temp\RtmpgJnyim\downloaded_packages
+> install.packages("BSDA")
+WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
+
+https://cran.rstudio.com/bin/windows/Rtools/
+Installing package into ‘C:/Users/Администратор/AppData/Local/R/win-library/4.3’
+(as ‘lib’ is unspecified)
+trying URL 'https://cran.rstudio.com/bin/windows/contrib/4.3/BSDA_1.2.2.zip'
+Content type 'application/zip' length 901182 bytes (880 KB)
+downloaded 880 KB
+
+package ‘BSDA’ successfully unpacked and MD5 sums checked
+
+The downloaded binary packages are in
+	C:\Users\Администратор\AppData\Local\Temp\RtmpgJnyim\downloaded_packages
+> install.packages("pwr")
+WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
+
+https://cran.rstudio.com/bin/windows/Rtools/
+Installing package into ‘C:/Users/Администратор/AppData/Local/R/win-library/4.3’
+(as ‘lib’ is unspecified)
+trying URL 'https://cran.rstudio.com/bin/windows/contrib/4.3/pwr_1.3-0.zip'
+Content type 'application/zip' length 159997 bytes (156 KB)
+downloaded 156 KB
+
+package ‘pwr’ successfully unpacked and MD5 sums checked
+
+The downloaded binary packages are in
+	C:\Users\Администратор\AppData\Local\Temp\RtmpgJnyim\downloaded_packages
+> library(dplyr)
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+> library(rafalib)
+> library(effsize)
+> library(BSDA)
+Loading required package: lattice
+
+Attaching package: ‘BSDA’
+
+The following object is masked from ‘package:datasets’:
+
+    Orange
+
+> library(pwr)
+> 
+> set.seed(4 )
+> samp <- rnorm(50,7,3)
+> samp
+ [1]  7.650265  5.372522  9.673434  8.787942 11.906854  9.067826  3.156260  6.360566 12.689620 12.330590  8.699813  7.047158  8.149172
+[14]  6.864589  7.103056  7.507080 10.495081  6.867388  6.698895  6.149666 11.622445  7.495507 10.922867 10.864771  8.778691  6.151169
+[27] 10.767652  9.729517  4.215916 10.720543  7.460393 10.155798  4.737366  2.553433  9.583396  5.786441  6.317784  9.802289  5.602312
+[40]  5.087370 11.031126  7.544606 10.877537  1.935854  4.537019  4.413562  7.296531  5.873035  9.171712  1.607854
+> qqnorm(samp)
+> qqline(samp)
+> Z <- qnorm(0.975) # 95% CI
+> Z
+[1] 1.959964
+> SE <- 3/sqrt(50)
+> SE
+[1] 0.4242641
+> lolv <- mean(samp) - 2*SE
+> uplv <- mean(samp) + 2*SE
+> CI <- c(lolv,uplv)
+> CI
+[1] 6.855917 8.552974
+> # Генерируя выборку, мы представляли, будто не знаем среднее арифметическое.
+> # Теперь мы определили доверительный интервал и можем себя проверить
+> 7 >= CI[1] & 7 <= CI[2]
+[1] TRUE
+> # Сравним как работает ЦПТ на выборках разных объемов
+> bigpar(1,3)
+> set.seed(3)
+> plot(7 + c(-4,4), c(1,1), type="n", xlab="mu", ylab="доверительные интервалы", ylim=c(1,100), main="N=10")
+> abline(v=7, col="brown", lwd=2)
+> for (i in 1:100) {
++   sam <- rnorm(10,7,3)
++   SE <- sd(sam)/sqrt(10)
++   CI <- c(mean(sam)-Z*SE, mean(sam)+2*SE)
++   catch <- 7 >= CI[1] & 7 <= CI[2]
++   color <- ifelse(catch, "blue", "red")
++   lines(CI, c(i,i), col=color, lwd=2)
++ }
+> plot(7 + c(-4,4), c(1,1), type="n", xlab="mu", ylab="доверительные интервалы", ylim=c(1,100), main="N=50")
+> abline(v=7, col="brown", lwd=2)
+> for (i in 1:100) {
++   sam <- rnorm(50,7,3)
++   SE <- sd(sam)/sqrt(50)
++   CI <- c(mean(sam)-Z*SE, mean(sam)+2*SE)
++   catch <- 7 >= CI[1] & 7 <= CI[2]
++   color <- ifelse(catch, "blue", "red")
++   lines(CI, c(i,i), col=color, lwd=2)
++ }
+> plot(7 + c(-4,4), c(1,1), type="n", xlab="mu", ylab="доверительные интервалы", ylim=c(1,100), main="N=100")
+> abline(v=7, col="brown", lwd=2)
+> for (i in 1:100) {
++   sam <- rnorm(100,7,3)
++   SE <- sd(sam)/sqrt(100)
++   CI <- c(mean(sam)-Z*SE, mean(sam)+2*SE)
++   catch <- 7 >= CI[1] & 7 <= CI[2]
++   color <- ifelse(catch, "blue", "red")
++   lines(CI, c(i,i), col=color, lwd=2)
++ }
+> 
+> set.seed(3)
+> sam <- rnorm(10,7,3)
+> mypar(1,1)
+> qqnorm(sam, col=1, lwd=2)
+> qqline(sam, col="red")
+> set.seed(3)
+> sam <- rnorm(10,7,3)
+> mypar(1,1)
+> qqnorm(sam, col=1, lwd=2)
+> qqline(sam, col="red")
+> # Сравним интервалы для t и z критериев при небольших выборках
+> bigpar(1,2)
+> set.seed(3)
+> t <- qt(0.975, 9)
+> plot(7 + c(-4,4), c(1,1), type="n", xlab="mu", ylab="доверительные интервалы", ylim=c(1,100), main="N=10, t-критерий")
+> abline(v=7, col="brown", lwd=2)
+> for (i in 1:100) {
++   sam <- rnorm(10,7,3)
++   SE <- sd(sam)/sqrt(10)
++   CI <- c(mean(sam)-Z*SE, mean(sam)+2*SE)
++   catch <- 7 >= CI[1] & 7 <= CI[2]
++   color <- ifelse(catch, "blue", "red")
++   lines(CI, c(i,i), col=color, lwd=2)
++ }
+> plot(7 + c(-4,4), c(1,1), type="n", xlab="mu", ylab="доверительные интервалы", ylim=c(1,100), main="N=10, z-критерий")
+> abline(v=7, col="brown", lwd=2)
+> for (i in 1:100) {
++   sam <- rnorm(10,7,3)
++   SE <- sd(sam)/sqrt(10)
++   CI <- c(mean(sam)-Z*SE, mean(sam)+2*SE)
++   catch <- 7 >= CI[1] & 7 <= CI[2]
++   color <- ifelse(catch, "blue", "red")
++   lines(CI, c(i,i), col=color, lwd=2)
++ }
+> 
+> Z
+[1] 1.959964
+> t
+[1] 2.262157
+> c(mean(sam)-Z*SE, mean(sam)+Z*SE)
+[1]  6.517155 11.148424
+> c(mean(sam)-t*SE, mean(sam)+t*SE)
+[1]  6.160124 11.505456
+> library(httr)
+> # Скачаем файл "cardio_train.csv"
+> filename <- "cardio_train.csv"
+> url <- "https://drive.google.com/uc?authuser=0&id=1qPKIRO3GfGNQK7rUFpZQWQRaNhTjHvJP&export=download"
+> GET(url, write_disk(filename, overwrite=TRUE))
+Response [https://drive.usercontent.google.com/download?id=1qPKIRO3GfGNQK7rUFpZQWQRaNhTjHvJP&export=download]
+  Date: 2024-03-01 19:09
+  Status: 200
+  Content-Type: application/octet-stream
+  Size: 2.94 MB
+<ON DISK>  C:\Users\Администратор\OneDrive\Документы\Alex\TEMP\Язык R для анализа данных\Урок 5. Статистический анализ в R. Тест гипотезы\00_HW\cardio_train.csv
+> df <- read.csv(filename, sep=";")
+> head(df, 3)
+  id   age gender height weight ap_hi ap_lo cholesterol gluc smoke alco active cardio
+1  0 18393      2    168     62   110    80           1    1     0    0      1      0
+2  1 20228      1    156     85   140    90           3    1     0    0      1      1
+3  2 18857      1    165     64   130    70           3    1     0    0      0      1
+> 
+> tidy_set <- df %>% filter((ap_lo<200 & ap_lo > 20) & (ap_hi<300 & ap_hi>40))
+> head(tidy_set)
+  id   age gender height weight ap_hi ap_lo cholesterol gluc smoke alco active cardio
+1  0 18393      2    168     62   110    80           1    1     0    0      1      0
+2  1 20228      1    156     85   140    90           3    1     0    0      1      1
+3  2 18857      1    165     64   130    70           3    1     0    0      0      1
+4  3 17623      2    169     82   150   100           1    1     0    0      1      1
+5  4 17474      1    156     56   100    60           1    1     0    0      0      0
+6  8 21914      1    151     67   120    80           2    2     0    0      0      0
+> # Задача: оценить среднее диастолическое давление мужчин и женщин с помощью 95% доверительного интервала
+> head(tidy_set[tidy_set$ap_hi < tidy_set$ap_lo,])
+       id   age gender height weight ap_hi ap_lo cholesterol gluc smoke alco active cardio
+469   681 19099      1    156     65   120   150           2    1     0    0      1      0
+628   913 20457      2    169     68    70   110           1    1     0    0      1      0
+2342 3356 23361      1    154    102    90   150           1    1     0    0      0      1
+2931 4214 21957      2    182     90    80   140           3    3     0    0      1      1
+3383 4880 19992      2    180     80    80   125           3    3     1    1      1      1
+3556 5130 21874      1    160     83    80   120           1    1     0    0      1      0
+> tidy_set_ <- tidy_set[tidy_set$ap_hi > tidy_set$ap_lo,]
+> dim(tidy_set_)
+[1] 68678    13
+> dim(tidy_set)
+[1] 68781    13
+> women_ <- tidy_set_$ap_lo[tidy_set_$gender==1]
+> men_ <- tidy_set_$ap_lo[tidy_set_$gender==2]
+> mypar(1,2)
+> qqnorm(men_, main="мужчины")
+> qqline(men_)
+> qqnorm(women_, main="женщины")
+> qqline(women_)
+> 
+> # С помощью функции summarize(), можно построить сводную таблицу, где будут подсчитаны нужные статистические значения
+> tidy_set_ %>% group_by(gender) %>% summarise(
++   mu=mean(ap_lo),
++   k=qt(0.975, length(ap_lo)-1),
++   se=sd(ap_lo)/sqrt(length(ap_lo)),
++   lowlevel=mean(ap_lo)-k*se,
++   hilevel=mean(ap_lo)+k*se
++ )
+# A tibble: 2 × 6
+  gender    mu     k     se lowlevel hilevel
+   <int> <dbl> <dbl>  <dbl>    <dbl>   <dbl>
+1      1  80.8  1.96 0.0450     80.7    80.9
+2      2  82.2  1.96 0.0601     82.1    82.3
+> 
+> infer <- tidy_set_ %>% group_by(gender) %>% summarise(
++   mu=mean(ap_lo),
++   k=qt(0.975, length(ap_lo)-1),
++   se=sd(ap_lo)/sqrt(length(ap_lo)),
++   lowlevel=mean(ap_lo) - k*se,
++   hilevel=mean(ap_lo) + k*se
++ )
+> infer
+# A tibble: 2 × 6
+  gender    mu     k     se lowlevel hilevel
+   <int> <dbl> <dbl>  <dbl>    <dbl>   <dbl>
+1      1  80.8  1.96 0.0450     80.7    80.9
+2      2  82.2  1.96 0.0601     82.1    82.3
+> ci_w <- c(infer[1, 5], infer[1,6])
+> ci_w <- as.numeric(c(infer[1,5], infer[-1,6]))
+> ci_w
+[1] 80.74758 82.29340
+> ci_m <- c(infer[2,5], infer[2,6])
+> ci_m <- as.numeric(ci_m)
+> ci_m
+[1] 82.05777 82.29340
+> # Графически интервальные оценки для мужчин и женщин
+> plot(
++   mean(women_), col=2, lwd=2, xlim=c(0.5,2.5), ylim=c(78, 84),
++   ylab="среднее диастолическое давление", main="интервальная оценка"
++ )
+> interval <- c(80.75, 80.92)
+> lines(x=c(1,1), y=interval, col="red", lwd=3)
+> points(1.5,mean(men_), col=3, lwd=2)
+> interval_1 <- c(82.05, 82.29)
+> lines(x=c(1.5,1.5), y=interval_1, col="blue", lwd=3)
+> legend("topleft", c("women","men"), fill=c("red","blue"))
+> 
+> post <- c(
++   8.812, 9.055, 8.749, 9.479, 9.099, 8.754, 9.146, 9.221, 9.173, 8.908,
++   9.454, 9.117, 8.814, 8.336, 9.337, 8.987, 8.995, 9.283, 9.246, 9.178
++ )
+> # 1) Убеждаемся, что наблюдения независимы
+> # 2) Если небольшой объем выборки, проверяем на нормальность данные с помощью qq-графика
+> qqnorm(post)
+> qqline(post, col="red")
+> # Произведем расчет мощности теста
+> # Размер эффекта, значения ниже которого, мы считаем, не имеют для нас смысла
+> # ES (effect size) = 0.3 см
+> # Рассчитываем Z.0 для альфа = 0.05
+> qnorm(0.95)
+[1] 1.644854
+> # Вычисляем значение среднего, соответствующего Z.0 = 1.645
+> sig <- signif(0.3 / sqrt(20), 2)
+> sig
+[1] 0.067
+> sig_1 <- 9.0 + 1.645 * sig
+> sig_1
+[1] 9.110215
+> # Вычислим значение Z.1 (для Н1)
+> z_1 <- (sig_1 - 9.3) / sig
+> z_1
+[1] -2.832612
+> # Вычисляем мощность теста
+> 1 - pnorm(z_1)
+[1] 0.9976915
+> # 5.1) Для начала сделаем односторонний тест
+> z.test(post, alternative="g", mu=9, sigma.x=0.3)
+
+	One-sample z-Test
+
+data:  post
+z = 0.85194, p-value = 0.1971
+alternative hypothesis: true mean is greater than 9
+95 percent confidence interval:
+ 8.94681      NA
+sample estimates:
+mean of x 
+  9.05715 
+
+> # Рассчитаем наблюдаемое вручную и сравним со значением слева, что предоставляет функция
+> (mean(post)-9)*sqrt(20)/3
+[1] 0.08519419
+> # 5.2) Поведем тест гипотезы в R, только теперь двусторонний
+> # Сравним значения p-value для одностороннего и двустороннего теста:
+> z.test(post, alternative="g", mu=9, sigma.x=0.3)
+
+	One-sample z-Test
+
+data:  post
+z = 0.85194, p-value = 0.1971
+alternative hypothesis: true mean is greater than 9
+95 percent confidence interval:
+ 8.94681      NA
+sample estimates:
+mean of x 
+  9.05715 
+
+> z.test(post, alternative="two.sided", mu=9, sigma.x=0.3)
+
+	One-sample z-Test
+
+data:  post
+z = 0.85194, p-value = 0.3942
+alternative hypothesis: true mean is not equal to 9
+95 percent confidence interval:
+ 8.925672 9.188628
+sample estimates:
+mean of x 
+  9.05715 
+
+> t.test(sample(men_, 20), sample(women_, 20), var.equal = TRUE)
+
+	Two Sample t-test
+
+data:  sample(men_, 20) and sample(women_, 20)
+t = 0.29547, df = 38, p-value = 0.7692
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -6.144099  8.244099
+sample estimates:
+mean of x mean of y 
+    80.00     78.95 
+
+> t.test(sample(men_, 20), sample(women_, 20), var.equal = FALSE)
+
+	Welch Two Sample t-test
+
+data:  sample(men_, 20) and sample(women_, 20)
+t = -0.70617, df = 21.94, p-value = 0.4875
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -13.583551   6.683551
+sample estimates:
+mean of x mean of y 
+    83.50     86.95 
+
+> # 4.1) Для начала рассчитаем статистику d Коэна - Cohen's d
+> # Статистика Cohen's 'd'' - один из способов оценить размер эффекта. Показывает сколько стандартных общих отклонений между средними двух групп
+> s_pool <- sqrt(
++   ((length(women_)-1)*var(women_)+(length(men_)-1)*var(men_)) / 
++     (length(women_)+length(men_)-2)
++ )
+> d <- (mean(men_)-mean(women_))/s_pool
+> d
+[1] 0.141849
+> d <- cohen.d(d=men_, women_)
+> d
+
+Cohen's d
+
+d estimate: 0.141849 (negligible)
+95 percent confidence interval:
+    lower     upper 
+0.1261364 0.1575616 
+
+> d <- d$estimate
+> d
+[1] 0.141849
+> pwr.t2n.test(n1=length(women_), n2=length(men_), d=d, sig.level=0.05, alternative="two.sided")
+
+     t test power calculation 
+
+             n1 = 44735
+             n2 = 23943
+              d = 0.141849
+      sig.level = 0.05
+          power = 1
+    alternative = two.sided
+
+> t.test(men_, women_, alternative="two.sided")
+
+	Welch Two Sample t-test
+
+data:  men_ and women_
+t = 17.841, df = 49926, p-value < 2.2e-16
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ 1.192583 1.486963
+sample estimates:
+mean of x mean of y 
+ 82.17558  80.83581 
+
+> # Чтобы было ясно, что мы нашли было бы правильно сообщить размер эффекта в % и его доверительный интервал,
+> # рассчитанные следующим образом:
+> ((mean(men_)-mean(women_)) / mean(women_)) * 100  # размер эффекта в %
+[1] 1.6574
+> t <- t.test(men_, women_, alternative="two.sided")
+> ci <- t$conf.int
+> ci / mean(women_) * 100  # доверительный интервал для ES
+[1] 1.475315 1.839485
+attr(,"conf.level")
+[1] 0.95
+> 
+> attr(ci, "conf.level")
+[1] 0.95
+> pwr.t2n.test(n1=20, power=0.8, d=0.8, sig.level=0.05, alternative="two.sided")
+
+     t test power calculation 
+
+             n1 = 20
+             n2 = 34.9757
+              d = 0.8
+      sig.level = 0.05
+          power = 0.8
+    alternative = two.sided
+
+> # не обнаружили сильного эффекта
+> t.test(sample(men_, 20), sample(women_, 35))
+
+	Welch Two Sample t-test
+
+data:  sample(men_, 20) and sample(women_, 35)
+t = 0.32036, df = 45.129, p-value = 0.7502
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -3.398458  4.684173
+sample estimates:
+mean of x mean of y 
+ 83.50000  82.85714 
+
+> # Одновыборочный t.test:
+> t.test(sample(men_, 20))
+
+	One Sample t-test
+
+data:  sample(men_, 20)
+t = 35.53, df = 19, p-value < 2.2e-16
+alternative hypothesis: true mean is not equal to 0
+95 percent confidence interval:
+ 73.87561 83.12439
+sample estimates:
+mean of x 
+     78.5 
+
+> # Двухвыборочный t.test с зависимыми выборками:
+> t.test(
++   sample(men_, 20), sample(women_, 20), 
++   alternative="two.sided", paired=TRUE
++ )
+
+	Paired t-test
+
+data:  sample(men_, 20) and sample(women_, 20)
+t = 1.1176, df = 19, p-value = 0.2777
+alternative hypothesis: true mean difference is not equal to 0
+95 percent confidence interval:
+ -2.836792  9.336792
+sample estimates:
+mean difference 
+           3.25
