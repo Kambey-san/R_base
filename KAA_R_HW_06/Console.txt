@@ -1,0 +1,474 @@
+
+R version 4.3.2 (2023-10-31 ucrt) -- "Eye Holes"
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> setwd("C:/Users/Администратор/OneDrive/Документы/Alex/TEMP/Язык R для анализа данных/Урок 6. Статистический анализ в R. Anova. Регрессионный анализ/00_HW")
+> install.packages("rafalib")
+WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
+
+https://cran.rstudio.com/bin/windows/Rtools/
+Installing package into ‘C:/Users/Администратор/AppData/Local/R/win-library/4.3’
+(as ‘lib’ is unspecified)
+trying URL 'https://cran.rstudio.com/bin/windows/contrib/4.3/rafalib_1.0.0.zip'
+Content type 'application/zip' length 56500 bytes (55 KB)
+downloaded 55 KB
+
+package ‘rafalib’ successfully unpacked and MD5 sums checked
+
+The downloaded binary packages are in
+	C:\Users\Администратор\AppData\Local\Temp\RtmpMFyGIS\downloaded_packages
+> install.packages("effsize")
+WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
+
+https://cran.rstudio.com/bin/windows/Rtools/
+Installing package into ‘C:/Users/Администратор/AppData/Local/R/win-library/4.3’
+(as ‘lib’ is unspecified)
+trying URL 'https://cran.rstudio.com/bin/windows/contrib/4.3/effsize_0.8.1.zip'
+Content type 'application/zip' length 65127 bytes (63 KB)
+downloaded 63 KB
+
+package ‘effsize’ successfully unpacked and MD5 sums checked
+
+The downloaded binary packages are in
+	C:\Users\Администратор\AppData\Local\Temp\RtmpMFyGIS\downloaded_packages
+> install.packages("BSDA")
+WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
+
+https://cran.rstudio.com/bin/windows/Rtools/
+Installing package into ‘C:/Users/Администратор/AppData/Local/R/win-library/4.3’
+(as ‘lib’ is unspecified)
+trying URL 'https://cran.rstudio.com/bin/windows/contrib/4.3/BSDA_1.2.2.zip'
+Content type 'application/zip' length 902669 bytes (881 KB)
+downloaded 881 KB
+
+package ‘BSDA’ successfully unpacked and MD5 sums checked
+
+The downloaded binary packages are in
+	C:\Users\Администратор\AppData\Local\Temp\RtmpMFyGIS\downloaded_packages
+> install.packages("pwr")
+WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
+
+https://cran.rstudio.com/bin/windows/Rtools/
+Installing package into ‘C:/Users/Администратор/AppData/Local/R/win-library/4.3’
+(as ‘lib’ is unspecified)
+trying URL 'https://cran.rstudio.com/bin/windows/contrib/4.3/pwr_1.3-0.zip'
+Content type 'application/zip' length 160466 bytes (156 KB)
+downloaded 156 KB
+
+package ‘pwr’ successfully unpacked and MD5 sums checked
+
+The downloaded binary packages are in
+	C:\Users\Администратор\AppData\Local\Temp\RtmpMFyGIS\downloaded_packages
+> library(httr)
+> library(dplyr)
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+> library(rafalib)
+> library(effsize)
+Warning message:
+package ‘effsize’ was built under R version 4.3.3 
+> library(BSDA)
+Loading required package: lattice
+
+Attaching package: ‘BSDA’
+
+The following object is masked from ‘package:datasets’:
+
+    Orange
+
+Warning message:
+package ‘BSDA’ was built under R version 4.3.3 
+> library(pwr)
+Warning message:
+package ‘pwr’ was built under R version 4.3.3 
+> 
+> # Скачаем файл "cardio_train.csv"
+> filename <- "cardio_train.csv"
+> url <- "https://drive.google.com/uc?authuser=0&id=1qPKIRO3GfGNQK7rUFpZQWQRaNhTjHvJP&export=download"
+> GET(url, write_disk(filename, overwrite=TRUE))
+Response [https://drive.usercontent.google.com/download?id=1qPKIRO3GfGNQK7rUFpZQWQRaNhTjHvJP&export=download]
+  Date: 2024-03-05 19:10
+  Status: 200
+  Content-Type: application/octet-stream
+  Size: 2.94 MB
+<ON DISK>  C:\Users\Администратор\OneDrive\Документы\Alex\TEMP\Язык R для анализа данных\Урок 6. Статистический анализ в R. Anova. Регрессионный анализ\00_HW\cardio_train.csv
+> df <- read.csv(filename, sep=";")
+> head(df, 3)
+  id   age gender height weight ap_hi ap_lo cholesterol gluc smoke alco active cardio
+1  0 18393      2    168     62   110    80           1    1     0    0      1      0
+2  1 20228      1    156     85   140    90           3    1     0    0      1      1
+3  2 18857      1    165     64   130    70           3    1     0    0      0      1
+> df$age_years <- trunc(df$age / 365.25)
+> tidy_set <- df %>% filter((ap_lo<200 & ap_lo>20) & (ap_hi<300 & ap_hi>40))
+> head(tidy_set)
+  id   age gender height weight ap_hi ap_lo cholesterol gluc smoke alco active cardio age_years
+1  0 18393      2    168     62   110    80           1    1     0    0      1      0        50
+2  1 20228      1    156     85   140    90           3    1     0    0      1      1        55
+3  2 18857      1    165     64   130    70           3    1     0    0      0      1        51
+4  3 17623      2    169     82   150   100           1    1     0    0      1      1        48
+5  4 17474      1    156     56   100    60           1    1     0    0      0      0        47
+6  8 21914      1    151     67   120    80           2    2     0    0      0      0        59
+> tidy_set <- tidy_set[tidy_set$ap_hi > tidy_set$ap_lo,]
+> head(tidy_set)
+  id   age gender height weight ap_hi ap_lo cholesterol gluc smoke alco active cardio age_years
+1  0 18393      2    168     62   110    80           1    1     0    0      1      0        50
+2  1 20228      1    156     85   140    90           3    1     0    0      1      1        55
+3  2 18857      1    165     64   130    70           3    1     0    0      0      1        51
+4  3 17623      2    169     82   150   100           1    1     0    0      1      1        48
+5  4 17474      1    156     56   100    60           1    1     0    0      0      0        47
+6  8 21914      1    151     67   120    80           2    2     0    0      0      0        59
+> dim(tidy_set)
+[1] 68678    14
+> set.seed(1)
+> ind <- sample(seq(1, nrow(tidy_set)), 100)
+> ind
+  [1] 24388 59521 43307 11571 25173 32618 13903  8229 25305 22306 12204 43809 36244 45399  6519 19242 21875 58472 62956 21323 13284  7976
+ [23]  9392  3863 52253 26876 13973 31334 39241 47959 28278 66394 11367 13602  5051 16920 29660 56659 29697 11854 58661 51118 27075 22126
+ [45] 55091 58684 32987 12399 25488 60772 55084 51305 17626  8465  6563 62126 20205 62480 68581 55968  8615 41381 45196  9346 13824  8696
+ [67] 61798 61140 39557  7131 61256 51613 10816 49461 11096 12597 24450  8613 44660  6217 30249 64953 12669 47181 32441 23193 40942 20480
+ [89] 62492 68663 23836 11260  4182 27416 18540  5390 30929 21842 18144 30407
+> ts <- tidy_set[ind,]
+> head(ts)
+         id   age gender height weight ap_hi ap_lo cholesterol gluc smoke alco active cardio age_years
+24430 35507 15867      1    160     64   130    90           3    1     0    0      1      1        43
+59613 86607 21740      1    159     62   110    70           1    2     0    0      1      1        59
+43372 63061 19710      1    160     65   120    80           1    1     0    0      1      1        53
+11592 16855 21865      1    164     68   120    80           1    1     0    0      1      0        59
+25217 36636 23277      1    157     87   120    80           1    1     0    0      0      1        63
+32669 47515 17551      2    167     78   140   100           1    1     0    0      0      1        48
+> dim(ts)
+[1] 100  14
+> plot(ts$ap_lo, ts$ap_hi, xlim=c(0,120), ylim=c(0,200), col="red", lwd=2)
+> # Функции lm() и predict()
+> # Построим парную линейную регрессию, в качестве независимой переменной возьмем нижнее давление пациента
+> fitm <- lm(ts$ap_hi ~ ts$ap_lo)
+> fitm
+
+Call:
+lm(formula = ts$ap_hi ~ ts$ap_lo)
+
+Coefficients:
+(Intercept)     ts$ap_lo  
+     32.961        1.121  
+
+> hi_hat <- 32.961 + 1.121 * ts$ap_lo
+> hi_hat
+  [1] 133.851 111.431 122.641 122.641 122.641 145.061 122.641 133.851 133.851 122.641 122.641 133.851 111.431 111.431 111.431 133.851
+ [17] 111.431 117.036 133.851 122.641 122.641 122.641 100.221 133.851 122.641 122.641 122.641 122.641 122.641 122.641 122.641 122.641
+ [33] 122.641 111.431 122.641 100.221 122.641 122.641 122.641 122.641 122.641 133.851 122.641 133.851 111.431 122.641 133.851 128.246
+ [49] 122.641 133.851 100.221 110.310 122.641 133.851 111.431 122.641 133.851 133.851 111.431 111.431 122.641 133.851 111.431 122.641
+ [65] 122.641 133.851 122.641 100.221 122.641 111.431 145.061 111.431 111.431 111.431 111.431 145.061 122.641 122.641 122.641 122.641
+ [81] 111.431 122.641 122.641 122.641 100.221 100.221 133.851 133.851 133.851 122.641 133.851 122.641 122.641 111.431 122.641 122.641
+ [97] 122.641 100.221 100.221 145.061
+> # Функция predict() упрощает вычисления оценочного параметра, ее особенно удобно использовать, когда имеем дело не с одним Х
+> as.numeric(predict(fitm, ts))
+  [1] 133.8566 111.4353 122.6460 122.6460 122.6460 145.0673 122.6460 133.8566 133.8566 122.6460 122.6460 133.8566 111.4353 111.4353
+ [15] 111.4353 133.8566 111.4353 117.0406 133.8566 122.6460 122.6460 122.6460 100.2247 133.8566 122.6460 122.6460 122.6460 122.6460
+ [29] 122.6460 122.6460 122.6460 122.6460 122.6460 111.4353 122.6460 100.2247 122.6460 122.6460 122.6460 122.6460 122.6460 133.8566
+ [43] 122.6460 133.8566 111.4353 122.6460 133.8566 128.2513 122.6460 133.8566 100.2247 110.3142 122.6460 133.8566 111.4353 122.6460
+ [57] 133.8566 133.8566 111.4353 111.4353 122.6460 133.8566 111.4353 122.6460 122.6460 133.8566 122.6460 100.2247 122.6460 111.4353
+ [71] 145.0673 111.4353 111.4353 111.4353 111.4353 145.0673 122.6460 122.6460 122.6460 122.6460 111.4353 122.6460 122.6460 122.6460
+ [85] 100.2247 100.2247 133.8566 133.8566 133.8566 122.6460 133.8566 122.6460 122.6460 111.4353 122.6460 122.6460 122.6460 100.2247
+ [99] 100.2247 145.0673
+> signif(fitm$coefficients, 10)
+(Intercept)    ts$ap_lo 
+  32.960740    1.121065 
+> 32.96074004 + 1.121065203*ts$ap_lo
+  [1] 133.8566 111.4353 122.6460 122.6460 122.6460 145.0673 122.6460 133.8566 133.8566 122.6460 122.6460 133.8566 111.4353 111.4353
+ [15] 111.4353 133.8566 111.4353 117.0406 133.8566 122.6460 122.6460 122.6460 100.2247 133.8566 122.6460 122.6460 122.6460 122.6460
+ [29] 122.6460 122.6460 122.6460 122.6460 122.6460 111.4353 122.6460 100.2247 122.6460 122.6460 122.6460 122.6460 122.6460 133.8566
+ [43] 122.6460 133.8566 111.4353 122.6460 133.8566 128.2513 122.6460 133.8566 100.2247 110.3142 122.6460 133.8566 111.4353 122.6460
+ [57] 133.8566 133.8566 111.4353 111.4353 122.6460 133.8566 111.4353 122.6460 122.6460 133.8566 122.6460 100.2247 122.6460 111.4353
+ [71] 145.0673 111.4353 111.4353 111.4353 111.4353 145.0673 122.6460 122.6460 122.6460 122.6460 111.4353 122.6460 122.6460 122.6460
+ [85] 100.2247 100.2247 133.8566 133.8566 133.8566 122.6460 133.8566 122.6460 122.6460 111.4353 122.6460 122.6460 122.6460 100.2247
+ [99] 100.2247 145.0673
+> plot(seq(1:length(ts$ap_hi)), ts$ap_hi, col="red", type="l")
+> lines(seq(1, length(hi_hat)), hi_hat, col="blue", type="l")
+> legend("topleft", c("ts$ap_hi", "hi_hat"), col=c(2,3), lty=c(1,1))
+> summary(fitm)
+
+Call:
+lm(formula = ts$ap_hi ~ ts$ap_lo)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-23.857  -2.646  -2.646   6.143  36.143 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  32.9607     8.2713   3.985  0.00013 ***
+ts$ap_lo      1.1211     0.1036  10.821  < 2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 9.675 on 98 degrees of freedom
+Multiple R-squared:  0.5444,	Adjusted R-squared:  0.5397 
+F-statistic: 117.1 on 1 and 98 DF,  p-value: < 2.2e-16
+
+> qqnorm(fitm$residuals)
+> qqline(fitm$residuals)
+> summary(fitm)
+
+Call:
+lm(formula = ts$ap_hi ~ ts$ap_lo)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-23.857  -2.646  -2.646   6.143  36.143 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  32.9607     8.2713   3.985  0.00013 ***
+ts$ap_lo      1.1211     0.1036  10.821  < 2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 9.675 on 98 degrees of freedom
+Multiple R-squared:  0.5444,	Adjusted R-squared:  0.5397 
+F-statistic: 117.1 on 1 and 98 DF,  p-value: < 2.2e-16
+
+> rse <- sqrt(sum(residuals(fitm)^2) / fitm$df.residual)
+> rse
+[1] 9.674722
+> Rs <- cor(ts$ap_hi, ts$ap_lo)^2
+> Rs
+[1] 0.5443829
+> R_adj <- 1-((1-Rs)*((100-1)/(100-1-1)))
+> R_adj
+[1] 0.5397338
+> tsn <- ts[,-c(1,2)]
+> head(tsn)
+      gender height weight ap_hi ap_lo cholesterol gluc smoke alco active cardio age_years
+24430      1    160     64   130    90           3    1     0    0      1      1        43
+59613      1    159     62   110    70           1    2     0    0      1      1        59
+43372      1    160     65   120    80           1    1     0    0      1      1        53
+11592      1    164     68   120    80           1    1     0    0      1      0        59
+25217      1    157     87   120    80           1    1     0    0      0      1        63
+32669      2    167     78   140   100           1    1     0    0      0      1        48
+> fit <- lm(tsn$ap_hi~., data=tsn)
+> summary(fit)
+
+Call:
+lm(formula = tsn$ap_hi ~ ., data = tsn)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-20.224  -5.954   0.527   3.642  31.716 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 24.286256  25.391474   0.956 0.341454    
+gender      -3.615951   2.551325  -1.417 0.159931    
+height       0.044289   0.157848   0.281 0.779689    
+weight       0.007098   0.074875   0.095 0.924695    
+ap_lo        1.049879   0.110798   9.476  4.3e-15 ***
+cholesterol  0.232651   1.801735   0.129 0.897553    
+gluc         0.400740   2.101891   0.191 0.849234    
+smoke        0.452179   6.675098   0.068 0.946145    
+alco         5.897386   5.878351   1.003 0.318497    
+active       0.336393   2.355827   0.143 0.886781    
+cardio       7.982523   2.229914   3.580 0.000562 ***
+age_years    0.121480   0.146599   0.829 0.409540    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 9.168 on 88 degrees of freedom
+Multiple R-squared:  0.6326,	Adjusted R-squared:  0.5867 
+F-statistic: 13.78 on 11 and 88 DF,  p-value: 6.174e-15
+
+> plot(
++   tidy_set$gluc, tidy_set$ap_hi, cex=1, col=tidy_set$gluc,
++   xlab="уровень глюкозы", ylab="верхнее давление", xlim=c(0.7, 3.5)
++ )
+> # работаем с выборкой
+> set.seed(1)
+> ind <- sample(seq(1, nrow(tidy_set)), 100)
+> ind
+  [1] 24388 59521 43307 11571 25173 32618 13903  8229 25305 22306 12204 43809 36244 45399  6519 19242 21875 58472 62956 21323 13284  7976
+ [23]  9392  3863 52253 26876 13973 31334 39241 47959 28278 66394 11367 13602  5051 16920 29660 56659 29697 11854 58661 51118 27075 22126
+ [45] 55091 58684 32987 12399 25488 60772 55084 51305 17626  8465  6563 62126 20205 62480 68581 55968  8615 41381 45196  9346 13824  8696
+ [67] 61798 61140 39557  7131 61256 51613 10816 49461 11096 12597 24450  8613 44660  6217 30249 64953 12669 47181 32441 23193 40942 20480
+ [89] 62492 68663 23836 11260  4182 27416 18540  5390 30929 21842 18144 30407
+> ts <- tidy_set[ind,]
+> head(ts)
+         id   age gender height weight ap_hi ap_lo cholesterol gluc smoke alco active cardio age_years
+24430 35507 15867      1    160     64   130    90           3    1     0    0      1      1        43
+59613 86607 21740      1    159     62   110    70           1    2     0    0      1      1        59
+43372 63061 19710      1    160     65   120    80           1    1     0    0      1      1        53
+11592 16855 21865      1    164     68   120    80           1    1     0    0      1      0        59
+25217 36636 23277      1    157     87   120    80           1    1     0    0      0      1        63
+32669 47515 17551      2    167     78   140   100           1    1     0    0      0      1        48
+> table(ts$gluc)
+
+ 1  2  3 
+81 12  7 
+> table(ts$gender, ts$gluc)
+   
+     1  2  3
+  1 49 11  6
+  2 32  1  1
+> head(tidy_set)
+  id   age gender height weight ap_hi ap_lo cholesterol gluc smoke alco active cardio age_years
+1  0 18393      2    168     62   110    80           1    1     0    0      1      0        50
+2  1 20228      1    156     85   140    90           3    1     0    0      1      1        55
+3  2 18857      1    165     64   130    70           3    1     0    0      0      1        51
+4  3 17623      2    169     82   150   100           1    1     0    0      1      1        48
+5  4 17474      1    156     56   100    60           1    1     0    0      0      0        47
+6  8 21914      1    151     67   120    80           2    2     0    0      0      0        59
+> set.seed(1)
+> # g1 - gluc == 1; s1 - gender == 1
+> # g2 - gluc == 2; s2 - gender == 2
+> g1_s1 <- sample(tidy_set$ap_hi[tidy_set$gluc==1 & tidy_set$gender==1], 20)
+> g1_s1
+ [1] 110 120 110 140 120 110 120 115 120 160 130 140 120 140 140 150 140 120 120 130
+> g1_s2 <- sample(tidy_set$ap_hi[tidy_set$gluc==1 & tidy_set$gender==2], 20)
+> g1_s2
+ [1] 120  90 120 170 130 120 100 110 120 120 120 120 135 130 120 140  90 110 120 130
+> g2_s1 <- sample(tidy_set$ap_hi[tidy_set$gluc==2 & tidy_set$gender==1], 20)
+> g2_s1
+ [1] 170 130 130 130 130 120 120 105 130 120 120 100 150 130 120 140 130 120 130 180
+> g2_s2 <- sample(tidy_set$ap_hi[tidy_set$gluc==2 & tidy_set$gender==2], 20)
+> g2_s2
+ [1] 150 140 160 140 130 140 120 180 140 140 140 120 140 120 130 110 120 120 150 120
+> g3_s1 <- sample(tidy_set$ap_hi[tidy_set$gluc==3 & tidy_set$gender==1], 20)
+> g3_s1
+ [1] 120 140 130 140 150 140 120 110 180 200 120 130 140 120 110 140 150 150 140 120
+> g3_s2 <- sample(tidy_set$ap_hi[tidy_set$gluc==3 & tidy_set$gender==2], 20)
+> g3_s2
+ [1] 120 130 130 145 120 140 140 120 160 120 120 150 130 120 145 120 130 150 120 150
+> # новый вектор "gender_new" и "gluc_new"
+> gender_new <- c(rep(1,20), rep(2,20), rep(1,20), rep(2,20), rep(1,20), rep(2,20))
+> gender_new
+  [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2
+ [67] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+> gluc_new <- c(rep(1,40), rep(2,40), rep(3,40))
+> gluc_new
+  [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+ [67] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
+> sam_s <-c(g1_s1, g1_s2, g2_s1, g2_s2, g3_s1, g3_s2)
+> sam_s
+  [1] 110 120 110 140 120 110 120 115 120 160 130 140 120 140 140 150 140 120 120 130 120  90 120 170 130 120 100 110 120 120 120 120 135
+ [34] 130 120 140  90 110 120 130 170 130 130 130 130 120 120 105 130 120 120 100 150 130 120 140 130 120 130 180 150 140 160 140 130 140
+ [67] 120 180 140 140 140 120 140 120 130 110 120 120 150 120 120 140 130 140 150 140 120 110 180 200 120 130 140 120 110 140 150 150 140
+[100] 120 120 130 130 145 120 140 140 120 160 120 120 150 130 120 145 120 130 150 120 150
+> anovaframe <- data.frame(sam_s, gender_new, gluc_new)  # соблюдаются случайность и независимость
+> head(anovaframe, 25)
+   sam_s gender_new gluc_new
+1    110          1        1
+2    120          1        1
+3    110          1        1
+4    140          1        1
+5    120          1        1
+6    110          1        1
+7    120          1        1
+8    115          1        1
+9    120          1        1
+10   160          1        1
+11   130          1        1
+12   140          1        1
+13   120          1        1
+14   140          1        1
+15   140          1        1
+16   150          1        1
+17   140          1        1
+18   120          1        1
+19   120          1        1
+20   130          1        1
+21   120          2        1
+22    90          2        1
+23   120          2        1
+24   170          2        1
+25   130          2        1
+> table(anovaframe$gender_new, anovaframe$gluc_new)
+   
+     1  2  3
+  1 20 20 20
+  2 20 20 20
+> boxplot(
++   sam_s~gender_new, data=anovaframe, boxwex=0.15, at=1:2-0.3,
++   subset=gluc_new==1, col="green", main="EDA ANOVA",
++   xlab="пол", ylab="верхнее давление",
++   xlim=c(0.5, 2.5), ylim=c(0, 200)
++ )
+> boxplot(
++   sam_s~gender_new, data=anovaframe, add=TRUE,
++   boxwex=0.2, at=1:2-0.1, subset=gluc_new==2, col="orange"
++ )
+> boxplot(
++   sam_s~gender_new, data=anovaframe, add=TRUE,
++   boxwex=0.2, at=1:2+0.15, subset=gluc_new==3, col="brown"
++ )
+> legend(
++   "bottomleft",
++   c("gluc=1", "gluc=2", "gluc=3"),
++   fill=c("green", "orange", "brown")
++ )
+> 
+> # Критерий Бартлетта
+> bartlett.test(list(g1_s1, g1_s2, g2_s1, g2_s2, g3_s1, g3_s2))
+
+	Bartlett test of homogeneity of variances
+
+data:  list(g1_s1, g1_s2, g2_s1, g2_s2, g3_s1, g3_s2)
+Bartlett's K-squared = 6.5385, df = 5, p-value = 0.2573
+
+> mypar(2,3)
+> qqnorm(g1_s1)
+> qqline(g1_s1)
+> qqnorm(g1_s2)
+> qqline(g1_s2)
+> qqnorm(g2_s1)
+> qqline(g2_s1)
+> qqnorm(g2_s2)
+> qqline(g2_s2)
+> qqnorm(g3_s1)
+> qqline(g3_s1)
+> qqnorm(g3_s2)
+> qqline(g3_s2)
+> # Сбалансированные данные НЕ влияют на порядок включения факторов в модель
+> summary(aov(sam_s~gender_new + gluc_new + gender_new:gluc_new, data=anovaframe))
+                     Df Sum Sq Mean Sq F value  Pr(>F)   
+gender_new            1    130   130.2   0.426 0.51532   
+gluc_new              1   2420  2420.0   7.915 0.00576 **
+gender_new:gluc_new   1     31    31.2   0.102 0.74978   
+Residuals           116  35468   305.8                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> summary(aov(sam_s~gluc_new + gender_new + gluc_new:gender_new, data=anovaframe))
+                     Df Sum Sq Mean Sq F value  Pr(>F)   
+gluc_new              1   2420  2420.0   7.915 0.00576 **
+gender_new            1    130   130.2   0.426 0.51532   
+gluc_new:gender_new   1     31    31.2   0.102 0.74978   
+Residuals           116  35468   305.8                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> summary(aov(sam_s~gender_new * gluc_new, data=anovaframe))
+                     Df Sum Sq Mean Sq F value  Pr(>F)   
+gender_new            1    130   130.2   0.426 0.51532   
+gluc_new              1   2420  2420.0   7.915 0.00576 **
+gender_new:gluc_new   1     31    31.2   0.102 0.74978   
+Residuals           116  35468   305.8                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
